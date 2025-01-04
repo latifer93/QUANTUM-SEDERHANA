@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUANTUM TAHFIDZ</title>
+    <title>QUANTUM SEDERHANA</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,7 +58,7 @@
         <label for="endAyat">Ayat Akhir:</label>
         <input type="number" id="endAyat" placeholder="Contoh: 252">
     </div>
-    <button onclick="acakAyat()">Acak Ayat</button>
+    <button id="actionBtn" onclick="acakAyat()">Acak Ayat</button>
     <div id="result">
         <!-- Hasil pengacakan akan muncul di sini -->
     </div>
@@ -79,6 +79,7 @@
         ];
 
         let ayatTeracak = [];
+        let ayatRange = [];
 
         function acakAyat() {
             const startJuz = parseInt(document.getElementById("startJuz").value);
@@ -102,7 +103,7 @@
                 return;
             }
 
-            const ayatRange = [];
+            ayatRange = [];
             validAyat.forEach(j => {
                 for (let i = Math.max(j.start, startAyat); i <= Math.min(j.end, endAyat); i++) {
                     if (!ayatTeracak.some(a => a.ayat === i && a.surah === j.surah)) {
@@ -120,6 +121,7 @@
                 return;
             }
 
+            // Jika sudah diacak, ubah tombol menjadi Reset
             const randomIndex = Math.floor(Math.random() * ayatRange.length);
             const randomAyat = ayatRange[randomIndex];
 
@@ -135,6 +137,20 @@
                 <p>Jumlah soal: ${ayatTeracak.length}</p>
                 <p>Sisa: ${ayatRange.length - 1}</p>
             `;
+
+            // Cek jika semua ayat sudah diacak
+            if (ayatTeracak.length >= ayatRange.length) {
+                document.getElementById("actionBtn").innerText = "Reset";
+                document.getElementById("actionBtn").setAttribute("onclick", "resetAcak()");
+            }
+        }
+
+        function resetAcak() {
+            ayatTeracak = [];
+            document.getElementById("result").innerHTML = '';
+            document.getElementById("summary").innerHTML = '';
+            document.getElementById("actionBtn").innerText = "Acak Ayat";
+            document.getElementById("actionBtn").setAttribute("onclick", "acakAyat()");
         }
     </script>
 </body>
