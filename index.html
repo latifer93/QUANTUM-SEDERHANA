@@ -97,34 +97,25 @@
                 return;
             }
 
-            const validAyat = juzData.filter(j => j.juz >= startJuz && j.juz <= endJuz);
-            if (!validAyat.length) {
-                document.getElementById("result").innerHTML = `<p style="color:red;">Data tidak ditemukan untuk rentang ini!</p>`;
-                return;
-            }
+            if (ayatRange.length === 0) {
+                ayatRange = juzData
+                    .filter(j => j.juz >= startJuz && j.juz <= endJuz)
+                    .flatMap(j => {
+                        const ayats = [];
+                        for (let i = Math.max(j.start, startAyat); i <= Math.min(j.end, endAyat); i++) {
+                            ayats.push({ ayat: i, surah: j.surah, juz: j.juz });
+                        }
+                        return ayats;
+                    });
 
-            ayatRange = [];
-            validAyat.forEach(j => {
-                for (let i = Math.max(j.start, startAyat); i <= Math.min(j.end, endAyat); i++) {
-                    if (!ayatTeracak.some(a => a.ayat === i && a.surah === j.surah)) {
-                        ayatRange.push({ ayat: i, surah: j.surah, juz: j.juz });
-                    }
+                if (!ayatRange.length) {
+                    document.getElementById("result").innerHTML = `<p style="color:red;">Tidak ada ayat yang cocok dalam rentang ini!</p>`;
+                    return;
                 }
-            });
-
-            if (!ayatRange.length) {
-                document.getElementById("result").innerHTML = `<p style="color:red;">Tidak ada ayat yang cocok dalam rentang ini!</p>`;
-                document.getElementById("summary").innerHTML = `
-                    <p>Jumlah soal: ${ayatTeracak.length}</p>
-                    <p>Sisa: 0</p>
-                `;
-                return;
             }
 
-            // Jika sudah diacak, ubah tombol menjadi Reset
             const randomIndex = Math.floor(Math.random() * ayatRange.length);
-            const randomAyat = ayatRange[randomIndex];
-
+            const randomAyat = ayatRange.splice(randomIndex, 1)[0];
             ayatTeracak.push(randomAyat);
 
             document.getElementById("result").innerHTML = `
@@ -135,11 +126,10 @@
 
             document.getElementById("summary").innerHTML = `
                 <p>Jumlah soal: ${ayatTeracak.length}</p>
-                <p>Sisa: ${ayatRange.length - 1}</p>
+                <p>Sisa: ${ayatRange.length}</p>
             `;
 
-            // Cek jika semua ayat sudah diacak
-            if (ayatTeracak.length >= ayatRange.length) {
+            if (ayatRange.length === 0) {
                 document.getElementById("actionBtn").innerText = "Reset";
                 document.getElementById("actionBtn").setAttribute("onclick", "resetAcak()");
             }
@@ -147,6 +137,7 @@
 
         function resetAcak() {
             ayatTeracak = [];
+            ayatRange = [];
             document.getElementById("result").innerHTML = '';
             document.getElementById("summary").innerHTML = '';
             document.getElementById("actionBtn").innerText = "Acak Ayat";
